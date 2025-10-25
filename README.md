@@ -93,6 +93,9 @@ Aplicație pentru rezervarea camerelor de hotel, dezvoltată în două variante 
 Proiectul se desfășoară în cadrul metodologiei Agile/Scrum, având trei sprinturi lunare între 13 octombrie – 31 ianuarie.
 
 ---
+## Diagrama WBS
+![App Screenshot](WBS.png)
+
 
 ## Organizare echipă
  Project Manager - Oblesniuc Stefana  
@@ -102,7 +105,9 @@ Dev - Nicanor Mihaila
 Tester - Ceausene Patricia  
 Tester - Mirica Victor    
 
+## Metodologie Folosita: Agile
 
+Am decis sa folosim metodologia Agile, care se focuseaza atat pe echipa, cat si pe rezultate, dar si pentru ca este cea mai folosita metodologie pentru organizarea unui proiect. Ne vom organiza pe sprint-uri. La fiecare sprint review, project manager-ul si team leader-ul vor evalua progresul si vor pregati urmatoarele task-uri, planuri. Project Manager-ul va formula diferite story-uri in format google doc pe parcursul fiecarui sprint. Acestea vor fi analizate de catre echipa, vor primi story points si vor fi repartizate catre developeri si testeri. Software Developerii si Testerul vor lucra in de aproape. La inceputul sprint-ului, se vor discuta diferite aspecte organizatorice, printre care si obiectivul sprint-ului. Se va lua in considerare timpul de implementare si de testare si se vor face estimari pentru resursele disponibile si alocate. 
 
 ## Sprint 1 – Analiză și Design Arhitectural
 Perioadă: 13 Octombrie – 10 Noiembrie  
@@ -199,6 +204,7 @@ O aplicație complet funcțională de rezervare camere hotel, implementată și 
 
 
 ## Diagrama Gantt
+![App Screenshot](diagrama_gantt.jpeg)
 
 
 
