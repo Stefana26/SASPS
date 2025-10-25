@@ -95,12 +95,12 @@ Proiectul se desfășoară în cadrul metodologiei Agile/Scrum, având trei spri
 ---
 
 ## Organizare echipă
-Project Manager - Oblesniuc Stefana
-Team Lead - Dinu Ion-Irinel
-Dev - Ciobanu Andrei
-Dev - Nicanor Mihaila
-Tester - Ceausene Patricia
-Tester - Mirica Victor   
+ Project Manager - Oblesniuc Stefana  
+Team Lead - Dinu Ion-Irinel  
+Dev - Ciobanu Andrei  
+Dev - Nicanor Mihaila  
+Tester - Ceausene Patricia  
+Tester - Mirica Victor    
 
 
 
