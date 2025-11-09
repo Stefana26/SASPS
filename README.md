@@ -94,7 +94,7 @@ Proiectul se desfășoară în cadrul metodologiei Agile/Scrum, având trei spri
 
 ---
 ## Diagrama WBS
-![App Screenshot](WBS.png)
+![App Screenshot](documentation/diagrams/WBS.png)
 
 
 ## Organizare echipă
@@ -197,19 +197,19 @@ Obiectiv: Finalizarea aplicației, testare și documentație
 
 ---
 ## UML Cazuri de Utilizare
-![App Screenshot](uml_useCase.png)
+![App Screenshot](documentation/diagrams/uml_useCase.png)
 
 ## UML Clase
-![App Screenshot](uml_clase.png)
+![App Screenshot](documentation/diagrams/uml_clase.png)
 
 ## UML Secvență
-![App Screenshot](uml_secventa.png)
+![App Screenshot](documentation/diagrams/uml_secventa.png)
 
 ## UML componente  - monolith
-![App Screenshot](uml_monolit.png)
+![App Screenshot](documentation/diagrams/uml_monolit.png)
 
 ## UML componente  - microservicii
-![App Screenshot](uml_servicii.png)
+![App Screenshot](documentation/diagrams/uml_servicii.png)
 
 ## Rezultat final
 O aplicație complet funcțională de rezervare camere hotel, implementată și comparată în două arhitecturi:
@@ -218,7 +218,4 @@ O aplicație complet funcțională de rezervare camere hotel, implementată și 
 
 
 ## Diagrama Gantt
-![App Screenshot](diagrama_gantt.jpeg)
-
-
-
+![App Screenshot](documentation/diagrams/diagrama_gantt.jpeg)
