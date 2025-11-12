@@ -1,12 +1,12 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import HotelList from "./components/Hotels/HotelList"
+import HotelDetails from "./components/Hotels/HotelDetails"
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <div className='text-red-400 text-5xl mt-32'> Initial commit</div>
-    </div>
+    <Routes>
+      <Route path="/" element={<HotelList />} />
+      <Route path="/hotel/:id" element={<HotelDetails />} />
+    </Routes>
   );
 }
-
-export default App;
