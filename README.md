@@ -211,7 +211,7 @@ Obiectiv: Finalizarea aplicației, testare și documentație
 ## UML componente  - microservicii
 ![App Screenshot](documentation/diagrams/uml_servicii.png)
 
-## Rezultat final
+## Rezultat final proiect
 O aplicație complet funcțională de rezervare camere hotel, implementată și comparată în două arhitecturi:
 - Monolitică  
 - Bazată pe microservicii  
