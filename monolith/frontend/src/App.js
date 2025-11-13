@@ -5,7 +5,10 @@ import AddHotel from "./components/Hotels/AddHotel";
 import EditHotel from "./components/Hotels/EditHotel"
 import Navbar from "./components/Navbar/Navbar";
 import Login from "./components/Login/Login";
-
+import RoomList from "./components/Rooms/RoomList";
+import AddRoom from "./components/Rooms/AddRoom";
+import EditRoom from "./components/Rooms/EditRoom";
+import RoomDetails from "./components/Rooms/RoomDetails";
 
 export default function App() {
   return (
@@ -17,6 +20,11 @@ export default function App() {
           <Route path="/hotel/:id" element={<HotelDetails />} />
           <Route path="/hotel/new" element={<AddHotel />} />
           <Route path="/hotel/:id/edit" element={<EditHotel />} />
+          <Route path="/hotel/:hotelId/rooms" element={<RoomList />} />
+          <Route path="/hotel/:hotelId/rooms/new" element={<AddRoom />} />
+          <Route path="/hotel/:hotelId/rooms/:roomId" element={<RoomDetails />} />
+          <Route path="/room/:id/edit" element={<EditRoom />} />
+          <Route path="/hotel/:hotelId/rooms/:roomId/edit" element={<EditRoom />} />
           <Route path="/login" element={<Login/>}/>
         </Routes>
       </div>
