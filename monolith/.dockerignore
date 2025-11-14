@@ -1,0 +1,16 @@
+target/
+!target/*.jar
+.git
+.gitignore
+.mvn
+*.md
+*.sh
+*.py
+*.js
+*.lua
+*.json
+.DS_Store
+.idea
+.vscode
+*.iml
+logs/
