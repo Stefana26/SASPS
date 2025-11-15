@@ -118,6 +118,12 @@ const HotelDetails = () => {
             Edit
           </button>
           <button
+            onClick={() => navigate(`/hotel/${id}/rooms`)}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            View Rooms
+          </button>
+          <button
             onClick={handleDelete}
             className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
           >

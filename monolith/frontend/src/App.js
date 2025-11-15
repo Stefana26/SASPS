@@ -18,10 +18,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HotelList />} />
           <Route path="/hotel/:id" element={<HotelDetails />} />
+          <Route path="/hotel/:id/rooms" element={<RoomList />} />
           <Route path="/hotel/new" element={<AddHotel />} />
           <Route path="/hotel/:id/edit" element={<EditHotel />} />
-          <Route path="/hotel/:hotelId/rooms" element={<RoomList />} />
-          <Route path="/hotel/:hotelId/rooms/new" element={<AddRoom />} />
+          <Route path="/hotel/:id/rooms" element={<RoomList />} />
+          <Route path="/hotel/:hotelId/room/new" element={<AddRoom />} />
           <Route path="/hotel/:hotelId/rooms/:roomId" element={<RoomDetails />} />
           <Route path="/room/:id/edit" element={<EditRoom />} />
           <Route path="/hotel/:hotelId/rooms/:roomId/edit" element={<EditRoom />} />
