@@ -9,7 +9,9 @@ import com.sasps.hotelbooking.model.User;
 import com.sasps.hotelbooking.repository.BookingRepository;
 import com.sasps.hotelbooking.repository.RoomRepository;
 import com.sasps.hotelbooking.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
 public class BookingService {
@@ -31,6 +32,59 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+
+    private final Counter bookingsCreatedCounter;
+    private final Counter bookingsConfirmedCounter;
+    private final Counter bookingsCancelledCounter;
+    private final Counter bookingsCheckedInCounter;
+    private final Counter bookingsCheckedOutCounter;
+    private final Timer bookingCreationTimer;
+    private final Counter totalRevenueCounter;
+
+    public BookingService(BookingRepository bookingRepository,
+            RoomRepository roomRepository,
+            UserRepository userRepository,
+            MeterRegistry meterRegistry) {
+        this.bookingRepository = bookingRepository;
+        this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
+
+        this.bookingsCreatedCounter = Counter.builder("bookings.created")
+                .description("Total number of bookings created")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.bookingsConfirmedCounter = Counter.builder("bookings.confirmed")
+                .description("Total number of bookings confirmed")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.bookingsCancelledCounter = Counter.builder("bookings.cancelled")
+                .description("Total number of bookings cancelled")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.bookingsCheckedInCounter = Counter.builder("bookings.checkedin")
+                .description("Total number of check-ins")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.bookingsCheckedOutCounter = Counter.builder("bookings.checkedout")
+                .description("Total number of check-outs")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.bookingCreationTimer = Timer.builder("booking.creation.time")
+                .description("Time taken to create a booking")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+
+        this.totalRevenueCounter = Counter.builder("revenue.total")
+                .description("Total revenue from confirmed bookings")
+                .baseUnit("RON")
+                .tag("architecture", "monolithic")
+                .register(meterRegistry);
+    }
 
     public List<BookingDto> getAllBookings() {
         log.debug("Fetching all bookings");
@@ -85,51 +139,62 @@ public class BookingService {
 
     @Transactional
     public BookingDto createBooking(BookingDto.CreateRequest request) {
-        log.info("Creating new booking for user id: {} and room id: {}", 
+        log.info("Creating new booking for user id: {} and room id: {}",
                 request.getUserId(), request.getRoomId());
-        validateBookingDates(request.getCheckInDate(), request.getCheckOutDate());
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
-        Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new ResourceNotFoundException("Room", "id", request.getRoomId()));
-        if (room.getStatus() != Room.RoomStatus.AVAILABLE) {
-            throw new BusinessException("Room is not available for booking");
+
+        Timer.Sample sample = Timer.start();
+
+        try {
+            validateBookingDates(request.getCheckInDate(), request.getCheckOutDate());
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
+            Room room = roomRepository.findById(request.getRoomId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Room", "id", request.getRoomId()));
+            if (room.getStatus() != Room.RoomStatus.AVAILABLE) {
+                throw new BusinessException("Room is not available for booking");
+            }
+            if (!bookingRepository.isRoomAvailable(
+                    request.getRoomId(),
+                    request.getCheckInDate(),
+                    request.getCheckOutDate())) {
+                throw new BusinessException("Room is already booked for the selected dates");
+            }
+            if (request.getNumberOfGuests() > room.getMaxOccupancy()) {
+                throw new BusinessException(String.format(
+                        "Number of guests (%d) exceeds room's maximum occupancy (%d)",
+                        request.getNumberOfGuests(), room.getMaxOccupancy()));
+            }
+            long numberOfNights = ChronoUnit.DAYS.between(
+                    request.getCheckInDate(),
+                    request.getCheckOutDate());
+            BigDecimal totalPrice = room.getPricePerNight()
+                    .multiply(BigDecimal.valueOf(numberOfNights));
+            String confirmationNumber = generateConfirmationNumber();
+            Booking booking = Booking.builder()
+                    .user(user)
+                    .room(room)
+                    .checkInDate(request.getCheckInDate())
+                    .checkOutDate(request.getCheckOutDate())
+                    .numberOfGuests(request.getNumberOfGuests())
+                    .totalPrice(totalPrice)
+                    .status(Booking.BookingStatus.PENDING)
+                    .specialRequests(request.getSpecialRequests())
+                    .confirmationNumber(confirmationNumber)
+                    .paymentStatus(Booking.PaymentStatus.PENDING)
+                    .paymentMethod(request.getPaymentMethod())
+                    .paidAmount(BigDecimal.ZERO)
+                    .build();
+            Booking savedBooking = bookingRepository.save(booking);
+
+            bookingsCreatedCounter.increment();
+
+            log.info("Booking created successfully with id: {} and confirmation number: {}",
+                    savedBooking.getId(), confirmationNumber);
+
+            return convertToDto(savedBooking);
+        } finally {
+            sample.stop(bookingCreationTimer);
         }
-        if (!bookingRepository.isRoomAvailable(
-                request.getRoomId(), 
-                request.getCheckInDate(), 
-                request.getCheckOutDate())) {
-            throw new BusinessException("Room is already booked for the selected dates");
-        }
-        if (request.getNumberOfGuests() > room.getMaxOccupancy()) {
-            throw new BusinessException(String.format(
-                    "Number of guests (%d) exceeds room's maximum occupancy (%d)",
-                    request.getNumberOfGuests(), room.getMaxOccupancy()));
-        }
-        long numberOfNights = ChronoUnit.DAYS.between(
-                request.getCheckInDate(), 
-                request.getCheckOutDate());
-        BigDecimal totalPrice = room.getPricePerNight()
-                .multiply(BigDecimal.valueOf(numberOfNights));
-        String confirmationNumber = generateConfirmationNumber();
-        Booking booking = Booking.builder()
-                .user(user)
-                .room(room)
-                .checkInDate(request.getCheckInDate())
-                .checkOutDate(request.getCheckOutDate())
-                .numberOfGuests(request.getNumberOfGuests())
-                .totalPrice(totalPrice)
-                .status(Booking.BookingStatus.PENDING)
-                .specialRequests(request.getSpecialRequests())
-                .confirmationNumber(confirmationNumber)
-                .paymentStatus(Booking.PaymentStatus.PENDING)
-                .paymentMethod(request.getPaymentMethod())
-                .paidAmount(BigDecimal.ZERO)
-                .build();
-        Booking savedBooking = bookingRepository.save(booking);
-        log.info("Booking created successfully with id: {} and confirmation number: {}", 
-                savedBooking.getId(), confirmationNumber);
-        return convertToDto(savedBooking);
     }
 
     @Transactional
@@ -138,14 +203,14 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", id));
         if (booking.getStatus() == Booking.BookingStatus.CANCELLED ||
-            booking.getStatus() == Booking.BookingStatus.CHECKED_OUT) {
+                booking.getStatus() == Booking.BookingStatus.CHECKED_OUT) {
             throw new BusinessException("Cannot update a cancelled or checked-out booking");
         }
         if (request.getCheckInDate() != null || request.getCheckOutDate() != null) {
-            LocalDate newCheckIn = request.getCheckInDate() != null ? 
-                    request.getCheckInDate() : booking.getCheckInDate();
-            LocalDate newCheckOut = request.getCheckOutDate() != null ? 
-                    request.getCheckOutDate() : booking.getCheckOutDate();
+            LocalDate newCheckIn = request.getCheckInDate() != null ? request.getCheckInDate()
+                    : booking.getCheckInDate();
+            LocalDate newCheckOut = request.getCheckOutDate() != null ? request.getCheckOutDate()
+                    : booking.getCheckOutDate();
             validateBookingDates(newCheckIn, newCheckOut);
             List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(
                     booking.getRoom().getId(), newCheckIn, newCheckOut);
@@ -199,6 +264,9 @@ public class BookingService {
         booking.setCancelledAt(LocalDateTime.now());
         booking.setCancellationReason(request.getCancellationReason());
         Booking cancelledBooking = bookingRepository.save(booking);
+
+        bookingsCancelledCounter.increment();
+
         log.info("Booking cancelled successfully with id: {}", id);
         return convertToDto(cancelledBooking);
     }
@@ -216,6 +284,10 @@ public class BookingService {
         booking.setPaymentMethod(request.getPaymentMethod());
         booking.setPaidAmount(request.getPaymentAmount());
         Booking confirmedBooking = bookingRepository.save(booking);
+
+        bookingsConfirmedCounter.increment();
+        totalRevenueCounter.increment(request.getPaymentAmount().doubleValue());
+
         log.info("Booking confirmed successfully with id: {}", id);
         return convertToDto(confirmedBooking);
     }
@@ -234,6 +306,9 @@ public class BookingService {
         booking.setStatus(Booking.BookingStatus.CHECKED_IN);
         booking.getRoom().setStatus(Room.RoomStatus.OCCUPIED);
         Booking checkedInBooking = bookingRepository.save(booking);
+
+        bookingsCheckedInCounter.increment();
+
         log.info("Booking checked in successfully with id: {}", id);
         return convertToDto(checkedInBooking);
     }
@@ -249,6 +324,9 @@ public class BookingService {
         booking.setStatus(Booking.BookingStatus.CHECKED_OUT);
         booking.getRoom().setStatus(Room.RoomStatus.AVAILABLE);
         Booking checkedOutBooking = bookingRepository.save(booking);
+
+        bookingsCheckedOutCounter.increment();
+
         log.info("Booking checked out successfully with id: {}", id);
         return convertToDto(checkedOutBooking);
     }

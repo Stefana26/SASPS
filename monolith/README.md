@@ -52,16 +52,23 @@ java -jar target/hotel-booking-monolith-1.0.0.jar
 
 ### 3. Accesează Aplicația
 
-- **URL API**: http://localhost:8080/api
+- **Frontend UI**: http://localhost:3002
+- **API**: http://localhost:8080/api
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Actuator**: http://localhost:8080/actuator/health
+
+### 4. Accesează Monitoring
+
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3001 (admin/admin)
 
 ### Oprire
 
 ```bash
-# Oprește baza de date
+# Oprește toate serviciile
 docker-compose down
 
-# Oprește baza de date și șterge datele
+# Oprește și șterge datele
 docker-compose down -v
 ```
 
@@ -123,3 +130,35 @@ monolith/
 
 Pentru documentație completă API, vezi [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) sau vizitează Swagger UI la:
 **http://localhost:8080/swagger-ui.html**
+
+---
+
+## Testare și Metrici
+
+### Testare API
+
+**Metode disponibile:**
+1. **Postman** - Import `Hotel_Booking_API.postman_collection.json`
+2. **Script Bash** - `./test_api.sh` (teste automate)
+3. **Load Testing** - k6
+
+```bash
+# Teste automate
+./test_api.sh
+
+# Load testing cu k6
+k6 run --env SCENARIO=load load_test_k6.js
+```
+
+### Metrici și Monitoring
+
+**Metrici runtime:**
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin/admin)
+- Actuator: http://localhost:8080/actuator
+
+**Metrici de dezvoltare:**
+```bash
+./generate_dev_metrics.sh
+cat DEV_METRICS_REPORT.md
+```
