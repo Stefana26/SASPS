@@ -39,6 +39,17 @@ const Navbar = () => {
           </NavLink>
 
           <NavLink
+            to="/bookings"
+            className={({ isActive }) =>
+              `text-sm font-medium ${
+                isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
+              }`
+            }
+          >
+            Bookings
+          </NavLink>
+          
+          <NavLink
             to="/login"
             className={({ isActive }) =>
               `text-sm font-medium ${
@@ -82,6 +93,13 @@ const Navbar = () => {
               className="text-gray-700 hover:text-blue-600 font-medium"
             >
               Add Hotel
+            </NavLink>
+            <NavLink
+              to="/bookings"
+              onClick={() => setOpen(false)}
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
+              Bookings
             </NavLink>
             <NavLink
               to="/login"
