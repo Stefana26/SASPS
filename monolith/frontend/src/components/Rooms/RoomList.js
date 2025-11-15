@@ -1,33 +1,73 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { FaBed } from "react-icons/fa"; // Room Icon
 
-export default function RoomList() {
-  const { hotelId } = useParams();
+const RoomList = () => {
+  const { id: hotelId } = useParams();
   const [rooms, setRooms] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/hotels/${hotelId}/rooms`)
-      .then((res) => res.json())
-      .then((data) => setRooms(data))
-      .catch(console.error);
+    const fetchRooms = async () => {
+      const res = await fetch(`http://localhost:8080/api/rooms/hotel/${hotelId}`);
+      const data = await res.json();
+      setRooms(data);
+    };
+
+    fetchRooms();
   }, [hotelId]);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Rooms for Hotel #{hotelId}</h2>
-      <Link to={`/hotel/${hotelId}/rooms/new`} className="text-blue-600 underline">
-         Add New Room
-      </Link>
-      <ul className="mt-4 space-y-2">
-        {rooms.map((room) => (
-          <li key={room.id} className="p-3 border rounded bg-white shadow">
-            <Link to={`/hotel/${hotelId}/rooms/${room.id}`} className="font-semibold">
-              {room.name}
-            </Link>{" "}
-            - {room.type} | {room.price}$/night
-          </li>
+    <div className="max-w-5xl mx-auto mt-12 bg-white p-6 rounded-2xl shadow">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-blue-700">Rooms</h2>
+
+        {/* Add Room Button */}
+        <button
+          onClick={() => navigate(`/hotel/${hotelId}/room/new`)}
+          className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
+        >
+         Add Room
+        </button>
+      </div>
+
+      {/* Room Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {rooms.map(room => (
+          <div
+            key={room.id}
+            className="border rounded-xl shadow hover:shadow-lg transition p-5 flex items-center gap-4"
+          >
+            {/* ICON INSTEAD OF IMAGE */}
+            <div className="bg-blue-100 p-4 rounded-full">
+              <FaBed size={35} className="text-blue-600" />
+            </div>
+
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold text-blue-600">
+                Room {room.roomNumber}
+              </h3>
+
+              <p className="text-gray-600">
+                Type: {room.roomType} • Status: {room.status}
+              </p>
+
+              <p className="text-gray-700 mt-1">
+                Price: <strong>${room.pricePerNight}</strong> / night
+              </p>
+
+              <button
+                onClick={() => navigate(`/rooms/${room.id}/reserve`)}
+                className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Reserve
+              </button>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
-}
+};
+
+export default RoomList;
