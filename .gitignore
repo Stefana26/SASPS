@@ -106,3 +106,4 @@ logs/
 # Spring Boot
 spring-boot-devtools.properties
 
+**/node_modules/

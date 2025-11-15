@@ -9,6 +9,8 @@ import RoomList from "./components/Rooms/RoomList";
 import AddRoom from "./components/Rooms/AddRoom";
 import EditRoom from "./components/Rooms/EditRoom";
 import RoomDetails from "./components/Rooms/RoomDetails";
+import BookingList from "./components/Bookings/BookingList";
+import BookingDetails from "./components/Bookings/BookingDetails";
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
           <Route path="/room/:id/edit" element={<EditRoom />} />
           <Route path="/hotel/:hotelId/rooms/:roomId/edit" element={<EditRoom />} />
           <Route path="/login" element={<Login/>}/>
+          <Route path="/bookings" element={<BookingList/>}/>
+          <Route path="/bookings/:id" element={<BookingDetails/>}/>
         </Routes>
       </div>
     </div>
