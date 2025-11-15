@@ -5,16 +5,33 @@ import { FaBed } from "react-icons/fa"; // Room Icon
 const RoomList = () => {
   const { id: hotelId } = useParams();
   const [rooms, setRooms] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is logged in and get their role
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    
     const fetchRooms = async () => {
-      const res = await fetch(`http://localhost:8080/api/rooms/hotel/${hotelId}`);
-      const data = await res.json();
-      setRooms(data);
+      try {
+        const res = await fetch(`http://localhost:8080/api/rooms/hotel/${hotelId}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch rooms');
+        }
+        const data = await res.json();
+        setRooms(data);
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+        setRooms([]);
+      }
     };
 
-    fetchRooms();
+    if (hotelId) {
+      fetchRooms();
+    }
   }, [hotelId]);
 
   return (
@@ -22,13 +39,15 @@ const RoomList = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-blue-700">Rooms</h2>
 
-        {/* Add Room Button */}
-        <button
-          onClick={() => navigate(`/hotel/${hotelId}/room/new`)}
-          className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
-        >
-         Add Room
-        </button>
+        {/* Add Room Button - Only for ADMIN */}
+        {user && user.role === "ADMIN" && (
+          <button
+            onClick={() => navigate(`/hotel/${hotelId}/room/new`)}
+            className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+           Add Room
+          </button>
+        )}
       </div>
 
       {/* Room Cards */}
@@ -57,10 +76,10 @@ const RoomList = () => {
               </p>
 
               <button
-                onClick={() => navigate(`/rooms/${room.id}/reserve`)}
+                onClick={() => navigate(`/hotel/${hotelId}/rooms/${room.id}`)}
                 className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
               >
-                Reserve
+                View Details & Reserve
               </button>
             </div>
           </div>

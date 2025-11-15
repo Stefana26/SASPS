@@ -203,14 +203,15 @@ const BookingDetails = () => {
           icon: "success",
           confirmButtonColor: "#2563eb",
         });
-        return navigate(`/bookings/${id}`);
+        return window.location.reload();
       }
   
-      // 400 — Only confirmed bookings can be checked in
+      // 400 — Business rule violation (wrong status or date)
       if (res.status === 400) {
+        const errorData = await res.json();
         return Swal.fire({
           title: "Cannot Check In",
-          text: "Only bookings with status 'CONFIRMED' can be checked in.",
+          text: errorData.message || "Only bookings with status 'CONFIRMED' and check-in date of today or earlier can be checked in.",
           icon: "error",
           confirmButtonColor: "#2563eb",
         });
@@ -272,14 +273,15 @@ const BookingDetails = () => {
           icon: "success",
           confirmButtonColor: "#2563eb",
         });
-        return navigate(`/bookings/${id}`);
+        return window.location.reload();
       }
   
       // 400 — Only checked-in bookings can be checked out
       if (res.status === 400) {
+        const errorData = await res.json();
         return Swal.fire({
           title: "Cannot Check Out",
-          text: "Only bookings with status 'CHECKED_IN' can be checked out.",
+          text: errorData.message || "Only bookings with status 'CHECKED_IN' can be checked out.",
           icon: "error",
           confirmButtonColor: "#2563eb",
         });
@@ -409,32 +411,37 @@ const BookingDetails = () => {
             </div>
             <div className="flex justify-between items-center mt-8">
 
-                {/* Left group: Check-In / Check-Out */}
+                {/* Left group: Check-In / Check-Out (Admin actions) */}
                 <div className="flex gap-4">
                 <button
                     onClick={handleCheckIn}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                    disabled={booking.status !== "CONFIRMED"}
+                    className={`px-6 py-2 rounded-lg transition ${
+                      booking.status === "CONFIRMED" 
+                        ? "bg-blue-600 text-white hover:bg-blue-700" 
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    title={booking.status !== "CONFIRMED" ? "Can only check in CONFIRMED bookings" : ""}
                 >
                     Check-In
                 </button>
 
                 <button
                     onClick={handleCheckOut}
-                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+                    disabled={booking.status !== "CHECKED_IN"}
+                    className={`px-6 py-2 rounded-lg transition ${
+                      booking.status === "CHECKED_IN" 
+                        ? "bg-green-600 text-white hover:bg-green-700" 
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    title={booking.status !== "CHECKED_IN" ? "Can only check out CHECKED_IN bookings" : ""}
                 >
                     Check-Out
                 </button>
                 </div>
 
-                {/* Right group: Confirm / Delete */}
+                {/* Right group: Delete only */}
                 <div className="flex gap-4">
-                <button
-                    onClick={handleConfirm}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                    Confirm
-                </button>
-
                 <button
                     onClick={handleDelete}
                     className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"

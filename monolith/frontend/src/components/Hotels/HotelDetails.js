@@ -6,9 +6,16 @@ import "sweetalert2/dist/sweetalert2.min.css";
 const HotelDetails = () => {
   const { id } = useParams();
   const [hotel, setHotel] = useState(null);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is logged in and get their role
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    
     const fetchHotel = async () => {
       try {
         const res = await fetch(`http://localhost:8080/api/hotels/${id}`);
@@ -111,24 +118,31 @@ const HotelDetails = () => {
         </a>
 
         <div className="flex justify-end gap-4 mt-8">
-          <button
-            onClick={() => navigate(`/hotel/${id}/edit`)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Edit
-          </button>
+          {/* Only show Edit and Delete buttons for ADMIN users */}
+          {user && user.role === "ADMIN" && (
+            <>
+              <button
+                onClick={() => navigate(`/hotel/${id}/edit`)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Edit
+              </button>
+            </>
+          )}
           <button
             onClick={() => navigate(`/hotel/${id}/rooms`)}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
           >
             View Rooms
           </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
-          >
-            Delete
-          </button>
+          {user && user.role === "ADMIN" && (
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
     </div>
