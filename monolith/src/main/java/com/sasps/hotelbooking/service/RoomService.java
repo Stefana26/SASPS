@@ -27,6 +27,13 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
 
+    public RoomDto getRoomById(Long id) {
+        log.debug("Fetching room with id: {}", id);
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room", "id", id));
+        return convertToDto(room);
+    }
+
     public RoomDto getRoomByRoomNumberAndHotel(String roomNumber, Long hotelId) {
         log.debug("Fetching room with room number: {} in hotel: {}", roomNumber, hotelId);
         Room room = roomRepository.findByRoomNumberAndHotelId(roomNumber, hotelId)

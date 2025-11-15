@@ -12,8 +12,17 @@ const HotelList = () => {
   const [search, setSearch] = useState("");
   const [city, setCity] = useState("");
   const [cities, setCities] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const BASE_URL = "http://localhost:8080/api/hotels";
+
+  useEffect(() => {
+    // Check if user is logged in and get their role
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   const fetchHotels = async () => {
     setLoading(true);
@@ -148,14 +157,17 @@ const HotelList = () => {
         </button>
       </div>
 
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={() => navigate("/hotel/new")}
-          className="bg-blue-600 text-white px-4 py-2 rounded-3xl hover:bg-blue-700 transition"
-        >
-          Add Hotel
-        </button>
-      </div>
+      {/* Only show Add Hotel button for ADMIN users */}
+      {user && user.role === "ADMIN" && (
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => navigate("/hotel/new")}
+            className="bg-blue-600 text-white px-4 py-2 rounded-3xl hover:bg-blue-700 transition"
+          >
+            Add Hotel
+          </button>
+        </div>
+      )}
 
       <h1 className="text-4xl font-bold text-center mb-10 text-blue-700">
         Available Hotels

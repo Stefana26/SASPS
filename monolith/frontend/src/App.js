@@ -5,6 +5,7 @@ import AddHotel from "./components/Hotels/AddHotel";
 import EditHotel from "./components/Hotels/EditHotel"
 import Navbar from "./components/Navbar/Navbar";
 import Login from "./components/Login/Login";
+import Signup from "./components/Signup/Signup";
 import RoomList from "./components/Rooms/RoomList";
 import AddRoom from "./components/Rooms/AddRoom";
 import EditRoom from "./components/Rooms/EditRoom";
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/room/:id/edit" element={<EditRoom />} />
           <Route path="/hotel/:hotelId/rooms/:roomId/edit" element={<EditRoom />} />
           <Route path="/login" element={<Login/>}/>
+          <Route path="/signup" element={<Signup/>}/>
           <Route path="/bookings" element={<BookingList/>}/>
           <Route path="/bookings/:id" element={<BookingDetails/>}/>
         </Routes>

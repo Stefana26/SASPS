@@ -26,6 +26,20 @@ public class RoomController {
 
     private final RoomService roomService;
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get room by ID", description = "Retrieve a specific room by its ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved room"),
+        @ApiResponse(responseCode = "404", description = "Room not found")
+    })
+    public ResponseEntity<RoomDto> getRoomById(
+            @Parameter(description = "Room ID", required = true)
+            @PathVariable Long id) {
+        log.info("GET /api/rooms/{} - Get room by ID", id);
+        RoomDto room = roomService.getRoomById(id);
+        return ResponseEntity.ok(room);
+    }
+
     @GetMapping("/hotel/{hotelId}")
     @Operation(summary = "Get rooms by hotel", description = "Retrieve all rooms for a specific hotel")
     @ApiResponses(value = {

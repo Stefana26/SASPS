@@ -25,7 +25,6 @@ const Login = () => {
     setLoading(true);
 
     try {
-    
       const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,18 +32,27 @@ const Login = () => {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(data));
+        
+        // Dispatch custom event to notify Navbar
+        window.dispatchEvent(new Event("userLoggedIn"));
+        
         Swal.fire({
           icon: "success",
           title: "Login successful!",
+          text: `Welcome back, ${data.firstName}!`,
           showConfirmButton: false,
           timer: 1500,
         });
         navigate("/");
       } else {
+        const errorData = await res.json();
         Swal.fire({
           icon: "error",
-          title: "Invalid credentials",
-          text: "Please check your email or password.",
+          title: "Login failed",
+          text: errorData.message || "Please check your email or password.",
           confirmButtonColor: "#2563eb",
         });
       }
@@ -106,12 +114,12 @@ const Login = () => {
           </form>
 
           <p className="text-center text-gray-500 text-sm mt-6">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/signup")}
               className="text-blue-600 hover:underline cursor-pointer"
             >
-              Register
+              Sign Up
             </span>
           </p>
         </div>

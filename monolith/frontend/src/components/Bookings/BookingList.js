@@ -10,23 +10,44 @@ const BookingList = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-//   const [city, setCity] = useState("");
-//   const [cities, setCities] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const BASE_URL = "http://localhost:8080/api/bookings";
+
+  useEffect(() => {
+    // Get logged-in user
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const res = await fetch(BASE_URL);
+      let url = BASE_URL;
+      
+      // If user is CUSTOMER, get only their bookings
+      if (user && user.role === "CUSTOMER") {
+        url = `${BASE_URL}/user/${user.id}`;
+      }
+      // If user is ADMIN, get all bookings (default endpoint)
+      
+      const res = await fetch(url);
       const data = await res.json();
       setBookings(data);
     } catch (err) {
-      console.error("Error fetching hotels:", err);
+      console.error("Error fetching bookings:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
 
   const searchBooking = async () => {
     if (!search.trim()) {
@@ -47,6 +68,12 @@ const BookingList = () => {
 
       const data = await res.json();
 
+      // Check if user is CUSTOMER and trying to view someone else's booking
+      if (user && user.role === "CUSTOMER" && data.userId !== user.id) {
+        setBookings([]); // Don't show bookings that don't belong to this user
+        return;
+      }
+
       // backend returns ONE booking, so store it as array
       setBookings([data]);
 
@@ -58,9 +85,16 @@ const BookingList = () => {
     }
   };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-700 text-lg mb-4">Please log in to view your bookings.</p>
+          <a href="/login" className="text-blue-600 font-semibold underline">Go to Login</a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -93,7 +127,7 @@ const BookingList = () => {
       </div>
 
       <h1 className="text-4xl font-bold text-center mb-10 text-blue-700">
-        Active Bookings
+        {user.role === "ADMIN" ? "All Bookings" : "My Bookings"}
       </h1>
 
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">

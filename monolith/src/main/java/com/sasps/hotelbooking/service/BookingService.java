@@ -177,16 +177,17 @@ public class BookingService {
                     .checkOutDate(request.getCheckOutDate())
                     .numberOfGuests(request.getNumberOfGuests())
                     .totalPrice(totalPrice)
-                    .status(Booking.BookingStatus.PENDING)
+                    .status(Booking.BookingStatus.CONFIRMED)
                     .specialRequests(request.getSpecialRequests())
                     .confirmationNumber(confirmationNumber)
-                    .paymentStatus(Booking.PaymentStatus.PENDING)
+                    .paymentStatus(Booking.PaymentStatus.PAID)
                     .paymentMethod(request.getPaymentMethod())
-                    .paidAmount(BigDecimal.ZERO)
+                    .paidAmount(totalPrice)
                     .build();
             Booking savedBooking = bookingRepository.save(booking);
 
             bookingsCreatedCounter.increment();
+            totalRevenueCounter.increment(totalPrice.doubleValue());
 
             log.info("Booking created successfully with id: {} and confirmation number: {}",
                     savedBooking.getId(), confirmationNumber);
