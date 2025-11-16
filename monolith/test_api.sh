@@ -99,7 +99,7 @@ CONFIRMATION_NUMBER=$(echo "$booking_response" | tail -n1 | jq -r '.confirmation
 
 test_endpoint "GET" "/bookings/$BOOKING_ID" "" 200 "Get booking by ID"
 test_endpoint "GET" "/bookings/confirmation/$CONFIRMATION_NUMBER" "" 200 "Get by confirmation"
-test_endpoint "PUT" "/bookings/$BOOKING_ID" '{"numberOfGuests":3}' 200 "Update booking"
+test_endpoint "PUT" "/bookings/$BOOKING_ID" '{"status": "PENDING", "numberOfGuests":1}' 200 "Update booking"
 test_endpoint "POST" "/bookings/$BOOKING_ID/confirm" '{"paymentAmount":1250.00,"paymentMethod":"CREDIT_CARD"}' 200 "Confirm booking"
 test_endpoint "POST" "/bookings/$BOOKING_ID/cancel" '{"cancellationReason":"Test"}' 200 "Cancel booking"
 
