@@ -30,7 +30,7 @@ echo "Masurare Maven build time..."
 BUILD_START=$(date +%s.%N)
 mvn clean package -DskipTests -q > "$TEMP_DIR/build.log" 2>&1
 BUILD_END=$(date +%s.%N)
-MAVEN_BUILD_TIME=$(echo "$BUILD_END - $BUILD_START" | bc)
+MAVEN_BUILD_TIME=$(echo "scale=2; $BUILD_END - $BUILD_START" | bc)
 
 if [ -f "target/hotel-booking-monolith-1.0.0.jar" ]; then
     JAR_SIZE=$(du -h "target/hotel-booking-monolith-1.0.0.jar" | cut -f1)
@@ -44,29 +44,27 @@ if [ -d "src/test/java" ] && [ "$(find src/test/java -name '*.java' | wc -l)" -g
     TEST_START=$(date +%s.%N)
     mvn test -q > "$TEMP_DIR/test.log" 2>&1 || true
     TEST_END=$(date +%s.%N)
-    TEST_TIME=$(echo "$TEST_END - $TEST_START" | bc)
+    TEST_TIME=$(echo "scale=2; $TEST_END - $TEST_START" | bc)
     TEST_AVAILABLE=true
 else
     TEST_AVAILABLE=false
-    TEST_TIME="N/A"
 fi
 
 # Java files count
 JAVA_FILES=$(find src/main/java -name "*.java" | wc -l | tr -d ' ')
 
-# Docker build time (include Maven build)
+# Docker build time
 if command -v docker &> /dev/null; then
     echo "Docker build..."
+    docker rmi hotel-booking-monolith:metrics-test > /dev/null 2>&1 || true
     DOCKER_BUILD_START=$(date +%s.%N)
-    docker build -t hotel-booking-monolith:metrics-test . > "$TEMP_DIR/docker_build.log" 2>&1
+    docker build --no-cache -t hotel-booking-monolith:metrics-test . > "$TEMP_DIR/docker_build.log" 2>&1
     DOCKER_BUILD_END=$(date +%s.%N)
-    DOCKER_BUILD_TIME=$(echo "$DOCKER_BUILD_END - $DOCKER_BUILD_START" | bc)
+    DOCKER_BUILD_TIME=$(echo "scale=2; $DOCKER_BUILD_END - $DOCKER_BUILD_START" | bc)
     DOCKER_IMAGE_SIZE=$(docker images hotel-booking-monolith:metrics-test --format "{{.Size}}" | head -1)
     DOCKER_AVAILABLE=true
 else
     DOCKER_AVAILABLE=false
-    DOCKER_BUILD_TIME="N/A"
-    DOCKER_IMAGE_SIZE="N/A"
 fi
 
 # Dependencies
@@ -101,7 +99,19 @@ fi
 cat >> "$REPORT_FILE" << EOF
 | Java Files | $JAVA_FILES |
 | Maven Build Time | ${MAVEN_BUILD_TIME}s |
+EOF
+
+if [ "$TEST_AVAILABLE" = true ]; then
+    cat >> "$REPORT_FILE" << EOF
 | Test Time | ${TEST_TIME}s |
+EOF
+else
+    cat >> "$REPORT_FILE" << EOF
+| Test Time | N/A |
+EOF
+fi
+
+cat >> "$REPORT_FILE" << EOF
 | JAR Size | $JAR_SIZE |
 EOF
 
