@@ -100,7 +100,7 @@ public class RoomController {
         return ResponseEntity.ok(rooms);
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     @Operation(summary = "Update room status", description = "Update the status of a specific room")
     public ResponseEntity<RoomDto> updateRoomStatus(
             @Parameter(description = "Room ID") @PathVariable Long id,

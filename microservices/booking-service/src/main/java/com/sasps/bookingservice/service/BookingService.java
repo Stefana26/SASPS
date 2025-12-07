@@ -135,7 +135,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         try {
-            roomServiceClient.updateRoomStatus(room.getId(), Map.of("status", "RESERVED"));
+            roomServiceClient.updateRoomStatus(room.getId(), "RESERVED");
         } catch (Exception e) {
             log.error("Failed to update room status", e);
         }
@@ -225,7 +225,7 @@ public class BookingService {
         Booking cancelledBooking = bookingRepository.save(booking);
 
         try {
-            roomServiceClient.updateRoomStatus(booking.getRoomId(), Map.of("status", AVAILABLE));
+            roomServiceClient.updateRoomStatus(booking.getRoomId(), AVAILABLE);
         } catch (Exception e) {
             log.error("Failed to update room status", e);
         }
@@ -290,7 +290,7 @@ public class BookingService {
         booking.setStatus(Booking.BookingStatus.CHECKED_IN);
         
         try {
-            roomServiceClient.updateRoomStatus(booking.getRoomId(), Map.of("status", "OCCUPIED"));
+            roomServiceClient.updateRoomStatus(booking.getRoomId(), "OCCUPIED");
         } catch (Exception e) {
             log.error("Failed to update room status", e);
         }
@@ -313,7 +313,7 @@ public class BookingService {
         booking.setStatus(Booking.BookingStatus.CHECKED_OUT);
 
         try {
-            roomServiceClient.updateRoomStatus(booking.getRoomId(), Map.of("status", AVAILABLE));
+            roomServiceClient.updateRoomStatus(booking.getRoomId(), AVAILABLE);
         } catch (Exception e) {
             log.error("Failed to update room status", e);
         }

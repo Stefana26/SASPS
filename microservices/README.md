@@ -170,7 +170,7 @@ TODO
 cd microservices
 
 # Start all services with Docker Compose
-docker-compose up --build
+docker compose up --build
 ```
 
 This will:
@@ -317,7 +317,7 @@ services:
 
 1. **Start Database**:
 ```bash
-docker-compose up -d db-cluster
+docker compose up -d db-cluster
 ```
 
 2. **Start Individual Services**:
@@ -339,7 +339,7 @@ mvn clean package
 
 ```bash
 # Stop all containers
-docker-compose down
+docker compose down
 ```
 
 ## Project Structure
