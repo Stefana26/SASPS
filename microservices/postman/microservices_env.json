@@ -1,0 +1,12 @@
+{
+  "_type": "environment",
+  "_id": "env_microservices",
+  "name": "Microservices Base URLs",
+  "data": [
+    {"key": "ROOM_BASE", "value": "http://localhost:8082", "enabled": true},
+    {"key": "BOOKING_BASE", "value": "http://localhost:8083", "enabled": true},
+    {"key": "PAYMENT_BASE", "value": "http://localhost:8084", "enabled": true},
+    {"key": "USER_BASE", "value": "http://localhost:8081", "enabled": true}
+  ]
+
+}

@@ -5,7 +5,7 @@ import com.sasps.paymentservice.repository.PaymentRepository;
 import com.sasps.paymentservice.dto.PaymentDto;
 import com.sasps.paymentservice.exception.BusinessException;
 import com.sasps.paymentservice.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
+// lombok.RequiredArgsConstructor removed to add explicit constructor
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +17,39 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+// Using explicit constructor
 @Transactional(readOnly = true)
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final io.micrometer.core.instrument.MeterRegistry meterRegistry;
+
+    private final io.micrometer.core.instrument.Counter paymentsCreatedCounter;
+    private final io.micrometer.core.instrument.Counter paymentsSucceededCounter;
+    private final io.micrometer.core.instrument.Counter paymentsFailedCounter;
+    private final io.micrometer.core.instrument.Timer paymentProcessingTimer;
+
+    public PaymentService(PaymentRepository paymentRepository,
+              io.micrometer.core.instrument.MeterRegistry meterRegistry) {
+    this.paymentRepository = paymentRepository;
+    this.meterRegistry = meterRegistry;
+
+    this.paymentsCreatedCounter = io.micrometer.core.instrument.Counter.builder("payments.created")
+        .description("Total number of payments created")
+        .register(meterRegistry);
+
+    this.paymentsSucceededCounter = io.micrometer.core.instrument.Counter.builder("payments.succeeded")
+        .description("Total successful payments")
+        .register(meterRegistry);
+
+    this.paymentsFailedCounter = io.micrometer.core.instrument.Counter.builder("payments.failed")
+        .description("Total failed payments")
+        .register(meterRegistry);
+
+    this.paymentProcessingTimer = io.micrometer.core.instrument.Timer.builder("payment.processing.time")
+        .description("Payment processing time")
+        .register(meterRegistry);
+    }
 
     public List<PaymentDto> getAllPayments() {
         log.debug("Fetching all payments");
@@ -55,6 +83,9 @@ public class PaymentService {
     public PaymentDto createPayment(PaymentDto paymentDto) {
         log.info("Creating new payment for booking id: {}", paymentDto.getBookingId());
 
+        io.micrometer.core.instrument.Timer.Sample sample = io.micrometer.core.instrument.Timer.start(meterRegistry);
+        paymentsCreatedCounter.increment();
+
         if (paymentRepository.findByBookingId(paymentDto.getBookingId()).isPresent()) {
             throw new BusinessException("Payment already exists for booking: " + paymentDto.getBookingId());
         }
@@ -77,14 +108,17 @@ public class PaymentService {
             payment.setStatus(Payment.PaymentStatus.COMPLETED);
             payment.setPaymentDate(LocalDateTime.now());
             log.info("Payment processed successfully");
+            paymentsSucceededCounter.increment();
         } else {
             payment.setStatus(Payment.PaymentStatus.FAILED);
             payment.setFailureReason("Payment gateway declined the transaction");
             log.warn("Payment processing failed");
+            paymentsFailedCounter.increment();
         }
 
         Payment savedPayment = paymentRepository.save(payment);
         log.info("Payment created with id: {}", savedPayment.getId());
+        sample.stop(paymentProcessingTimer);
 
         return convertToDto(savedPayment);
     }

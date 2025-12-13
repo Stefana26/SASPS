@@ -1,0 +1,60 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    architecture: 'microservices'
+    project: 'sasps-hotel-booking'
+    environment: 'development'
+
+scrape_configs:
+  - job_name: 'room-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['room-service:8082']
+        labels:
+          application: 'room-service'
+          architecture: 'microservices'
+
+  - job_name: 'booking-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['booking-service:8083']
+        labels:
+          application: 'booking-service'
+          architecture: 'microservices'
+
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['payment-service:8084']
+        labels:
+          application: 'payment-service'
+          architecture: 'microservices'
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    scrape_timeout: 4s
+    static_configs:
+      - targets: ['user-service:8081']
+        labels:
+          application: 'user-service'
+          architecture: 'microservices'
+
+  - job_name: 'node-exporter'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 8s
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          application: 'node-exporter'
+          architecture: 'microservices'
+
+  # We rely on node-exporter for host-level metrics and Micrometer for application metrics.

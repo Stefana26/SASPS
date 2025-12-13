@@ -10,7 +10,9 @@ import com.sasps.bookingservice.exception.ResourceNotFoundException;
 import com.sasps.bookingservice.model.Booking;
 import com.sasps.bookingservice.repository.BookingRepository;
 
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
@@ -21,13 +23,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BookingService {
 
@@ -36,6 +36,54 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final RoomServiceClient roomServiceClient;
     private final PaymentServiceClient paymentServiceClient;
+    private final MeterRegistry meterRegistry;
+
+    private final Counter bookingsCreatedCounter;
+    private final Counter bookingsConfirmedCounter;
+    private final Counter bookingsCancelledCounter;
+    private final Counter bookingsCheckedInCounter;
+    private final Counter bookingsCheckedOutCounter;
+    private final Timer bookingCreationTimer;
+    private final Counter totalRevenueCounter;
+
+    public BookingService(BookingRepository bookingRepository,
+                          RoomServiceClient roomServiceClient,
+                          PaymentServiceClient paymentServiceClient,
+                          MeterRegistry meterRegistry) {
+        this.bookingRepository = bookingRepository;
+        this.roomServiceClient = roomServiceClient;
+        this.paymentServiceClient = paymentServiceClient;
+        this.meterRegistry = meterRegistry;
+
+        this.bookingsCreatedCounter = Counter.builder("bookings.created")
+                .description("Total number of bookings created")
+                .register(meterRegistry);
+
+        this.bookingsConfirmedCounter = Counter.builder("bookings.confirmed")
+                .description("Total number of bookings confirmed")
+                .register(meterRegistry);
+
+        this.bookingsCancelledCounter = Counter.builder("bookings.cancelled")
+                .description("Total number of bookings cancelled")
+                .register(meterRegistry);
+
+        this.bookingsCheckedInCounter = Counter.builder("bookings.checkedin")
+                .description("Total number of check-ins")
+                .register(meterRegistry);
+
+        this.bookingsCheckedOutCounter = Counter.builder("bookings.checkedout")
+                .description("Total number of check-outs")
+                .register(meterRegistry);
+
+        this.bookingCreationTimer = Timer.builder("booking.creation.time")
+                .description("Time taken to create a booking")
+                .register(meterRegistry);
+
+        this.totalRevenueCounter = Counter.builder("revenue.total")
+                .description("Total revenue from confirmed bookings")
+                .baseUnit("RON")
+                .register(meterRegistry);
+    }
 
     public List<BookingDto> getAllBookings() {
         log.debug("Fetching all bookings");
@@ -83,6 +131,8 @@ public class BookingService {
     public BookingDto createBooking(BookingDto.CreateRequest request) {
         log.info("Creating new booking for user id: {} and room id: {}",
                 request.getUserId(), request.getRoomId());
+
+        Timer.Sample sample = Timer.start(meterRegistry);
 
         validateBookingDates(request.getCheckInDate(), request.getCheckOutDate());
 
@@ -139,6 +189,9 @@ public class BookingService {
         } catch (Exception e) {
             log.error("Failed to update room status", e);
         }
+
+        bookingsCreatedCounter.increment();
+        sample.stop(bookingCreationTimer);
 
         log.info("Booking created successfully with id: {} and confirmation number: {}",
                 savedBooking.getId(), confirmationNumber);
@@ -230,6 +283,7 @@ public class BookingService {
             log.error("Failed to update room status", e);
         }
 
+        bookingsCancelledCounter.increment();
         log.info("Booking cancelled successfully with id: {}", id);
         return convertToDto(cancelledBooking);
     }
@@ -269,6 +323,11 @@ public class BookingService {
             log.error("Failed to create payment record for booking: {}", confirmedBooking.getId(), e);
         }
 
+        bookingsConfirmedCounter.increment();
+        if (request.getPaymentAmount() != null) {
+            totalRevenueCounter.increment(request.getPaymentAmount().doubleValue());
+        }
+
         log.info("Booking confirmed successfully with id: {}", id);
         return convertToDto(confirmedBooking);
     }
@@ -295,6 +354,7 @@ public class BookingService {
             log.error("Failed to update room status", e);
         }
 
+        bookingsCheckedInCounter.increment();
         Booking checkedInBooking = bookingRepository.save(booking);
         log.info("Booking checked in successfully with id: {}", id);
         return convertToDto(checkedInBooking);
@@ -318,6 +378,7 @@ public class BookingService {
             log.error("Failed to update room status", e);
         }
 
+        bookingsCheckedOutCounter.increment();
         Booking checkedOutBooking = bookingRepository.save(booking);
         log.info("Booking checked out successfully with id: {}", id);
         return convertToDto(checkedOutBooking);

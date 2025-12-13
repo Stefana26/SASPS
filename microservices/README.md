@@ -89,14 +89,16 @@ All services connect to the **shared PostgreSQL database cluster**:
 ## Services
 
 ### 1. User Service (Port 8081)
-**Responsibility**: User authentication and management
+**Responsibility**: User authentication and management (placeholder)
+
+**Notes**: This repository includes a placeholder `user-service` with a minimal Spring Boot skeleton and Flyway migrations that create a `users` table and insert test users. The service currently only exposes `/actuator/health` and has no authentication or user APIs implemented yet.
 
 **Key Endpoints**:
-TODO
+- `/actuator/health` - Health endpoint (available)
 
-**Database Tables**: `users`
+**Database Tables**: `users` (created by Flyway migrations in `user-service/src/main/resources/db/migration`)
 
-**Swagger UI**: http://localhost:8081/swagger-ui.html
+**Swagger UI**: When the service is implemented, Swagger will be available at http://localhost:8081/swagger-ui.html
 
 ### 2. Room Service (Port 8082)
 **Responsibility**: Hotel and room management
@@ -186,6 +188,20 @@ Wait for all services to start. Check:
 - **Room Service**: http://localhost:8082/actuator/health
 - **Booking Service**: http://localhost:8083/actuator/health
 - **Payment Service**: http://localhost:8084/actuator/health
+
+### Monitoring
+
+- **Prometheus (metrics)**: http://localhost:9090
+- **Grafana (dashboard)**: http://localhost:3002
+
+The Grafana dashboard for microservices is provisioned under `microservices/grafana/dashboards/hotel-booking-microservices.json`. Use the `Application` variable in Grafana to select the service (booking-service, room-service, payment-service).
+
+To enable metrics scraping, ensure each service exposes the `/actuator/prometheus` endpoint; docker-compose sets `MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus` for each service in the `microservices/docker-compose.yml`.
+
+### Exporters (Host Metrics)
+
+- This microservices stack includes `node-exporter` for host-level metrics. Node Exporter provides CPU, memory, disk, and network metrics from the host, available in Prometheus at `http://localhost:9100/metrics` and in Grafana as Node metrics.
+- In Grafana, the microservices dashboard exposes a new section "Host Metrics" with panels for Node CPU/Memory; the `Application` variable can be used to select services and the `node-exporter` option to inspect node metrics.
 
 ## Database Schema
 
