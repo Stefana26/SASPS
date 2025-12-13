@@ -12,7 +12,8 @@ const BookingList = () => {
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const BASE_URL = "http://localhost:8080/api/bookings";
+  const BASE_URL = "/api/bookings";
+  //const BASE_URL = "http://localhost:8080/api/bookings";
 
   useEffect(() => {
     // Get logged-in user

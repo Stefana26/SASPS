@@ -14,7 +14,8 @@ const HotelList = () => {
   const [cities, setCities] = useState([]);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const BASE_URL = "http://localhost:8080/api/hotels";
+  const BASE_URL = "/api/hotels";
+  //const BASE_URL = "http://localhost:8080/api/hotels";
 
   useEffect(() => {
     // Check if user is logged in and get their role
