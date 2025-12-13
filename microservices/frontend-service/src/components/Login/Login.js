@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -12,11 +12,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Missing fields",
-        text: "Please enter both email and password.",
+        text: "Please enter both username/email and password.",
         confirmButtonColor: "#2563eb",
       });
       return;
@@ -28,7 +28,7 @@ const Login = () => {
       const res = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (res.ok) {
@@ -52,7 +52,7 @@ const Login = () => {
         Swal.fire({
           icon: "error",
           title: "Login failed",
-          text: errorData.message || "Please check your email or password.",
+          text: errorData.message || "Please check your username or password.",
           confirmButtonColor: "#2563eb",
         });
       }
@@ -80,13 +80,13 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+                Username or Email
               </label>
               <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="username or email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>

@@ -20,6 +20,23 @@ services:
       retries: 5
 
   # Microservices
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+    depends_on:
+      db-cluster:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: on-failure
+
   room-service:
     build:
       context: ./room-service
@@ -85,6 +102,8 @@ services:
     depends_on:
       db-cluster:
         condition: service_healthy
+      auth-service:
+        condition: service_started
       room-service:
         condition: service_started
       payment-service:
@@ -107,6 +126,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     depends_on:
+      - auth-service
       - room-service
       - booking-service
       - payment-service

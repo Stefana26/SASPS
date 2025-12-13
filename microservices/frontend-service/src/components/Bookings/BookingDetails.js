@@ -48,9 +48,19 @@ const BookingDetails = () => {
             });
             navigate("/bookings");
           } else {
+            let errorMessage = "Something went wrong while deleting the booking.";
+            try {
+              const errorData = await res.json();
+              if (errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch (e) {
+              // If error response is not JSON, use default message
+            }
+            
             Swal.fire({
               title: "Error!",
-              text: "Something went wrong while deleting the booking.",
+              text: errorMessage,
               icon: "error",
               confirmButtonColor: "#2563eb",
             });
@@ -65,6 +75,70 @@ const BookingDetails = () => {
         }
       }
     });
+  };
+
+  const handleCancel = async () => {
+    const { value: cancellationReason } = await Swal.fire({
+      title: "Cancel Booking",
+      text: "Please provide a reason for cancellation:",
+      input: "textarea",
+      inputPlaceholder: "Enter cancellation reason...",
+      showCancelButton: true,
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#9ca3af",
+      confirmButtonText: "Cancel Booking",
+      cancelButtonText: "Keep Booking",
+      inputValidator: (value) => {
+        if (!value) {
+          return "You need to provide a cancellation reason!";
+        }
+      },
+    });
+
+    if (cancellationReason) {
+      try {
+        const res = await fetch(`${BASE_URL}/bookings/${id}/cancel`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cancellationReason }),
+        });
+
+        if (res.ok) {
+          const updatedBooking = await res.json();
+          setBooking(updatedBooking);
+          await Swal.fire({
+            title: "Cancelled!",
+            text: "The booking has been cancelled successfully.",
+            icon: "success",
+            confirmButtonColor: "#2563eb",
+          });
+        } else {
+          let errorMessage = "Failed to cancel the booking.";
+          try {
+            const errorData = await res.json();
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            }
+          } catch (e) {
+            // If error response is not JSON, use default message
+          }
+          
+          Swal.fire({
+            title: "Error!",
+            text: errorMessage,
+            icon: "error",
+            confirmButtonColor: "#2563eb",
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: "Connection Error!",
+          text: "Could not connect to the server.",
+          icon: "error",
+          confirmButtonColor: "#2563eb",
+        });
+      }
+    }
   };
 
   const handleConfirm = async () => {
@@ -441,14 +515,24 @@ const BookingDetails = () => {
                 </button>
                 </div>
 
-                {/* Right group: Delete only */}
+                {/* Right group: Cancel and Delete */}
                 <div className="flex gap-4">
-                <button
+                {booking.status !== "CANCELLED" && (
+                  <button
+                    onClick={handleCancel}
+                    className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition"
+                  >
+                    Cancel Booking
+                  </button>
+                )}
+                {booking.status === "CANCELLED" && (
+                  <button
                     onClick={handleDelete}
                     className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
-                >
+                  >
                     Delete
-                </button>
+                  </button>
+                )}
             </div>
         </div>
       </div>

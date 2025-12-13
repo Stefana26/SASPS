@@ -66,14 +66,15 @@ export default function RoomDetails() {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/bookings", {
+      const response = await fetch("/api_booking_service/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(booking),
       });
 
       if (response.ok) {
-        const bookingResult = await response.json();
+        const text = await response.text();
+        const bookingResult = text ? JSON.parse(text) : {};
         Swal.fire({
           icon: "success",
           title: "Booking Successful!",
@@ -90,13 +91,21 @@ export default function RoomDetails() {
           navigate(`/bookings`);
         });
       } else {
-        const errorData = await response.json();
+        let errorMessage = "Unable to complete the booking. Please try again.";
+        try {
+          const text = await response.text();
+          if (text) {
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.message || errorMessage;
+          }
+        } catch (e) {
+          console.error("Error parsing error response:", e);
+        }
+        
         Swal.fire({
           icon: "error",
           title: "Booking Failed",
-          text:
-            errorData.message ||
-            "Unable to complete the booking. Please try again.",
+          text: errorMessage,
           confirmButtonColor: "#2563eb",
         });
       }
