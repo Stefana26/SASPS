@@ -4,10 +4,11 @@ import RoomForm from "./RoomForm";
 
 export default function AddRoom() {
   const navigate = useNavigate();
+   const BASE_URL = "/api_room_service";
 
   const handleAddRoom = async (roomData) => {
     try {
-      const response = await fetch("http://localhost:8080/api/rooms", {
+      const response = await fetch(BASE_URL + "/rooms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(roomData),

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
@@ -8,6 +8,7 @@ const HotelDetails = () => {
   const [hotel, setHotel] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const BASE_URL = "/api_room_service";
 
   useEffect(() => {
     // Check if user is logged in and get their role
@@ -18,7 +19,7 @@ const HotelDetails = () => {
     
     const fetchHotel = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/hotels/${id}`);
+        const res = await fetch(`${BASE_URL}/hotels/${id}`);
         const data = await res.json();
         setHotel(data);
       } catch (err) {
@@ -41,7 +42,7 @@ const HotelDetails = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`http://localhost:8080/api/hotels/${id}`, {
+          const res = await fetch(`${BASE_URL}/api/hotels/${id}`, {
             method: "DELETE",
           });
 

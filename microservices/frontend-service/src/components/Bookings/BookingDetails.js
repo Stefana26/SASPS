@@ -7,11 +7,12 @@ const BookingDetails = () => {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const navigate = useNavigate();
+  const BASE_URL = "/api_booking_service";
 
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/bookings/${id}`);
+        const res = await fetch(BASE_URL + `/bookings/${id}`);
         const data = await res.json();
         setBooking(data);
       } catch (err) {
@@ -34,7 +35,7 @@ const BookingDetails = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`http://localhost:8080/api/bookings/${id}`, {
+          const res = await fetch(`${BASE_URL}/bookings/${id}`, {
             method: "DELETE",
           });
 
@@ -118,7 +119,7 @@ const BookingDetails = () => {
     // Step 3 — Send API request
     try {
       const res = await fetch(
-        `http://localhost:8080/api/bookings/${id}/confirm`,
+        BASE_URL + `/bookings/${id}/confirm`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -189,7 +190,7 @@ const BookingDetails = () => {
   
     try {
       const res = await fetch(
-        `http://localhost:8080/api/bookings/${id}/check-in`,
+      BASE_URL + `/bookings/${id}/check-in`,
         {
           method: "POST",
         }
@@ -259,7 +260,7 @@ const BookingDetails = () => {
   
     try {
       const res = await fetch(
-        `http://localhost:8080/api/bookings/${id}/check-out`,
+        BASE_URL + `/bookings/${id}/check-out`,
         {
           method: "POST",
         }

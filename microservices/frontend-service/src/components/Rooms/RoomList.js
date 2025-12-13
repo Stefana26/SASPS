@@ -7,6 +7,7 @@ const RoomList = () => {
   const [rooms, setRooms] = useState([]);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const BASE_URL = "/api_room_service";
 
   useEffect(() => {
     // Check if user is logged in and get their role
@@ -17,7 +18,7 @@ const RoomList = () => {
     
     const fetchRooms = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/rooms/hotel/${hotelId}`);
+        const res = await fetch(BASE_URL + `/rooms/hotel/${hotelId}`);
         if (!res.ok) {
           throw new Error('Failed to fetch rooms');
         }

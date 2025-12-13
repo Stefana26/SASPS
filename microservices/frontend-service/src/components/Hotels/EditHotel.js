@@ -8,7 +8,7 @@ const EditHotel = () => {
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const BASE_URL = "http://localhost:8080/api/hotels";
+  const BASE_URL = "/api_room_service";
 
   useEffect(() => {
     const fetchHotel = async () => {

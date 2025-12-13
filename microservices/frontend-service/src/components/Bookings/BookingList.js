@@ -12,7 +12,7 @@ const BookingList = () => {
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const BASE_URL = "http://localhost:8080/api/bookings";
+  const BASE_URL = "/api_booking_service";
 
   useEffect(() => {
     // Get logged-in user
@@ -25,7 +25,7 @@ const BookingList = () => {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      let url = BASE_URL;
+      let url = BASE_URL + '/bookings'
       
       // If user is CUSTOMER, get only their bookings
       if (user && user.role === "CUSTOMER") {

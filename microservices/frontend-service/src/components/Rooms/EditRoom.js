@@ -7,9 +7,10 @@ export default function EditRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
+  const BASE_URL = "/api_room_service";
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/rooms/${id}`)
+    fetch(BASE_URL + `/rooms/${id}`)
       .then((res) => res.json())
       .then(setRoom)
       .catch((err) => console.error("Error loading room:", err));
@@ -17,7 +18,7 @@ export default function EditRoom() {
 
   const handleEditRoom = async (roomData) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/rooms/${id}`, {
+      const response = await fetch(BASE_URL + `/rooms/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(roomData),

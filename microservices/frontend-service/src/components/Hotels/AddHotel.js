@@ -7,6 +7,7 @@ const AddHotel = () => {
   const [hotel, setHotel] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const BASE_URL = "/api_room_service";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,7 +43,7 @@ const AddHotel = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8080/api/hotels", {
+      const res = await fetch(BASE_URL + "/hotels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(hotel),

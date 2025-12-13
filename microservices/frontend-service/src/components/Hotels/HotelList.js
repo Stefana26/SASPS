@@ -14,7 +14,7 @@ const HotelList = () => {
   const [cities, setCities] = useState([]);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const BASE_URL = "http://localhost:8080/api/hotels";
+  const BASE_URL = "/api_room_service";
 
   useEffect(() => {
     // Check if user is logged in and get their role
@@ -27,7 +27,7 @@ const HotelList = () => {
   const fetchHotels = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/hotels');
+      const res = await fetch(BASE_URL + "/hotels");
       const data = await res.json();
       setHotels(data);
       const cityList = [...new Set(data.map((h) => h.city))];
