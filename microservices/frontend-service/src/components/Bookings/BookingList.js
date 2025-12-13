@@ -29,15 +29,33 @@ const BookingList = () => {
       
       // If user is CUSTOMER, get only their bookings
       if (user && user.role === "CUSTOMER") {
-        url = `${BASE_URL}/user/${user.id}`;
+        url = `${BASE_URL}/bookings/user/${user.id}`;
       }
       // If user is ADMIN, get all bookings (default endpoint)
       
+      console.log("Fetching bookings from:", url);
       const res = await fetch(url);
+      console.log("Response status:", res.status);
+      
+      if (!res.ok) {
+        console.error("Failed to fetch bookings:", res.status, res.statusText);
+        setBookings([]);
+        return;
+      }
+      
       const data = await res.json();
-      setBookings(data);
+      console.log("Bookings data:", data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setBookings(data);
+      } else {
+        console.error("Expected array but got:", data);
+        setBookings([]);
+      }
     } catch (err) {
       console.error("Error fetching bookings:", err);
+      setBookings([]);
     } finally {
       setLoading(false);
     }

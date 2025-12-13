@@ -42,7 +42,7 @@ const HotelDetails = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${BASE_URL}/api/hotels/${id}`, {
+          const res = await fetch(`${BASE_URL}/hotels/${id}`, {
             method: "DELETE",
           });
 
