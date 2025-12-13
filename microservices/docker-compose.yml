@@ -71,6 +71,24 @@ services:
     networks:
       - microservices-network
     restart: on-failure
+  
+  frontend-service:
+    build:
+      context: ./frontend-service
+      dockerfile: Dockerfile
+    container_name: frontend-service
+    ports:
+      - "3000:80"
+    depends_on:
+      db-cluster:
+        condition: service_healthy
+      room-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+    networks:
+      - microservices-network
+    restart: on-failure
 
 networks:
   microservices-network:
