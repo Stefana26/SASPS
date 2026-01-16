@@ -16,8 +16,8 @@ const scenarios = {
     },
     load: {
         executor: 'constant-vus',
-        vus: 50,
-        duration: '2m',
+        vus: 1500,
+        duration: '5m',
     },
     stress: {
         executor: 'ramping-vus',
@@ -34,9 +34,9 @@ const scenarios = {
         executor: 'ramping-vus',
         startVUs: 0,
         stages: [
-            { duration: '30s', target: 20 },
+            { duration: '10s', target: 20 },
             { duration: '10s', target: 200 },
-            { duration: '30s', target: 200 },
+            { duration: '30s', target: 500 },
             { duration: '10s', target: 20 },
             { duration: '30s', target: 20 },
             { duration: '10s', target: 0 },
